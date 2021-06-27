@@ -1,0 +1,9 @@
+Package: robotpi
+Version: 1.0
+Section: custom
+Priority: optional
+Architecture: armhf
+Essential: no
+Installed-Size: 1024
+Maintainer: tigers-mannheim.de
+Description: Use the pi camera as sensor for the TIGERs Mannheim bots.
