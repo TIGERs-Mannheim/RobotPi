@@ -7,7 +7,6 @@
 
 #include "RPiCamera.h"
 #include <cstdio>
-#include <stdexcept>
 #include <map>
 
 #include "util/log.h"
@@ -26,7 +25,7 @@
 #define MMAL_CAMERA_CAPTURE_PORT  2
 
 // Video render needs at least 2 buffers to get to 60fps. 3 buffers for 90fps.
-#define VIDEO_OUTPUT_BUFFERS_NUM 3
+#define VIDEO_OUTPUT_BUFFERS_NUM 4
 
 namespace rpi
 {
@@ -245,13 +244,14 @@ RPiCamera::~RPiCamera()
 
 void RPiCamera::handlePreviewFrame(MMAL_BUFFER_HEADER_T* pBuf)
 {
-    if(mmal_queue_length(pFrameQueue) < 2)
+    if(mmal_queue_length(pFrameQueue) < 1)
     {
         // only enqueue if there is space available
         mmal_queue_put(pFrameQueue, pBuf);
     }
     else
     {
+        LogInfo("Dropping frame due to overload\n");
         // release directly
         releaseFrame(pBuf);
     }
@@ -292,12 +292,13 @@ void RPiCamera::handleImageEncoderFrame(MMAL_BUFFER_HEADER_T* pBuf)
             time(&rawtime);
             timeinfo = localtime(&rawtime);
 
-            strftime(imageFilename_, sizeof(imageFilename_), "img_%Y-%m-%d_%H-%M-%S.jpg", timeinfo);
+            strftime(imageFilename_, sizeof(imageFilename_), "/media/img_%Y-%m-%d_%H-%M-%S.jpg", timeinfo);
 
             pImageEncoderFile_ = fopen(imageFilename_, "w+");
             if(!pImageEncoderFile_)
             {
                 LogError("Cannot open JPG output file: %s\n", imageFilename_);
+                strcpy(imageFilename_, "Write failed.");
             }
             else
             {
@@ -307,7 +308,9 @@ void RPiCamera::handleImageEncoderFrame(MMAL_BUFFER_HEADER_T* pBuf)
 
         mmal_buffer_header_mem_lock(pBuf);
 
-        int bytesWritten = fwrite(pBuf->data, 1, pBuf->length, pImageEncoderFile_);
+        int bytesWritten = 0;
+        if(pImageEncoderFile_)
+            bytesWritten = fwrite(pBuf->data, 1, pBuf->length, pImageEncoderFile_);
 
         mmal_buffer_header_mem_unlock(pBuf);
 
@@ -319,7 +322,9 @@ void RPiCamera::handleImageEncoderFrame(MMAL_BUFFER_HEADER_T* pBuf)
 
     if(pBuf->flags & MMAL_BUFFER_HEADER_FLAG_FRAME_END)
     {
-        fclose(pImageEncoderFile_);
+        if(pImageEncoderFile_)
+            fclose(pImageEncoderFile_);
+
         pImageEncoderFile_ = 0;
         imagesTaken_++;
     }
@@ -327,7 +332,10 @@ void RPiCamera::handleImageEncoderFrame(MMAL_BUFFER_HEADER_T* pBuf)
     if(pBuf->flags & MMAL_BUFFER_HEADER_FLAG_TRANSMISSION_FAILED)
     {
         LogInfo("transmission failed flag set\n");
-        fclose(pImageEncoderFile_);
+
+        if(pImageEncoderFile_)
+            fclose(pImageEncoderFile_);
+
         pImageEncoderFile_ = 0;
     }
 
@@ -366,12 +374,13 @@ void RPiCamera::handleVideoEncoderFrame(MMAL_BUFFER_HEADER_T* pBuf)
             time(&rawtime);
             timeinfo = localtime(&rawtime);
 
-            strftime(videoFilename_, sizeof(videoFilename_), "vid_%Y-%m-%d_%H-%M-%S.h264", timeinfo);
+            strftime(videoFilename_, sizeof(videoFilename_), "/media/vid_%Y-%m-%d_%H-%M-%S.h264", timeinfo);
 
             pVideoEncoderFile_ = fopen(videoFilename_, "w+");
             if(!pVideoEncoderFile_)
             {
                 LogError("Cannot open H264 output file: %s\n", videoFilename_);
+                strcpy(videoFilename_, "Record failed.");
             }
             else
             {
@@ -384,7 +393,9 @@ void RPiCamera::handleVideoEncoderFrame(MMAL_BUFFER_HEADER_T* pBuf)
 
         mmal_buffer_header_mem_lock(pBuf);
 
-        int bytesWritten = fwrite(pBuf->data, 1, pBuf->length, pVideoEncoderFile_);
+        int bytesWritten = 0;
+        if(pVideoEncoderFile_)
+            bytesWritten = fwrite(pBuf->data, 1, pBuf->length, pVideoEncoderFile_);
 
         mmal_buffer_header_mem_unlock(pBuf);
 

@@ -12,3 +12,6 @@ Command::Command(uint8_t* pData, size_t length)
     cmdId_ = *reinterpret_cast<uint16_t*>(pData);
     data_.assign(pData + 2, pData + length);
 }
+
+Command::Command(): cmdId_(0)
+{}

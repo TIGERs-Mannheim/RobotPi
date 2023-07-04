@@ -1,36 +1,55 @@
-/*
- * test_main.cpp
- *
- *  Created on: 01.02.2021
- *      Author: FelixW
- */
-#include <iostream>
-#include "cvutils.h"
-#include "detector/WallLocalisation.h"
-#include "detector/RegionsLocalisation.h"
-#include "detector/GoalLocalisation.h"
+#include "util/YUVFile.h"
+#include "interface/RLEFrame.h"
+#include "util/UDPSocket.h"
+#include "steps/YPresummer.h"
+#include "steps/CameraCalibration.h"
+
 #include <chrono>
+#include <iostream>
 
 int main(int argc, const char **argv)
 {
     if(argc < 2)
     {
-        std::cout << "Usage: robotpi [path/to/test_image]" << std::endl;
-        return 0;
+        std::cout << "Usage: robotpi [path/to/test_image.yuv] ..." << std::endl;
+        return 1;
     }
 
-    FrameYUV420 yuvFrame = imageByPath(argv[1]);
+    State state;
+    state.pComm = std::make_unique<CommandTransceiver>();
 
-    GoalLocalisation detector(std::make_shared<TimeSync>());
-    auto startTime = std::chrono::high_resolution_clock::now();
+    UDPSocket socket("224.0.23.182", 28575);
+    YPresummer presummer;
+    ColorClassifierYUV classifier;
+    classifier.setDebugLevel(1);
+    RegionExtractor extractor;
+    CameraCalibration detector;
+    detector.setDebugLevel(1);
 
-    detector.processFrame(&yuvFrame);
+    for(int i = 1; i < argc; i++)
+    {
+        std::string imgName(argv[i]);
+        std::cout << "Current image: " << imgName << std::endl;
 
-    auto stopTime = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stopTime - startTime);
-    std::cout << duration.count() << std::endl;
+        YUVFile yuvFile(imgName);
+        state.pFrame = yuvFile.getFrame();
+        const FrameMetadata& metadata = state.pFrame->getMetadata();
+        state.uvWidth = metadata.width/2;
+        state.uvHeight = metadata.height/2;
 
-    showFrame(yuvFrame);
+        auto startTime = std::chrono::high_resolution_clock::now();
+
+        presummer.execute(state);
+        classifier.execute(state);
+        extractor.execute(state);
+        detector.execute(state);
+
+        std::cout << "main " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - startTime).count() / 1000.0 << " ms" << std::endl;
+
+        RLEFrame rle(metadata, state.frameColoredRuns);
+        socket.send(rle.getData());
+        YUVFile::write(imgName.substr(0, imgName.size()-4).append(".out.yuv"), state.pFrame);
+    }
 
     return 0;
 }

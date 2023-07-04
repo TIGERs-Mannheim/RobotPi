@@ -1,10 +1,10 @@
 #include "TigerComm.h"
 
 #include <iostream>
-#include <stdio.h>
 #include <fcntl.h>
-#include <errno.h>
-#include <string.h>
+#include <cerrno>
+#include <cstring>
+#include <utility>
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <linux/serial.h>
@@ -16,56 +16,34 @@ using namespace std;
 namespace rpi
 {
 
-TigerComm::TigerComm()
-:fileHandle_(-1), shutdownRequested_(false), receiveProcessingBufferPos_(0)
+TigerComm::TigerComm(const std::string& portName, int baudrate, RemoteTimeCallback timeCallback): timeCallback_(std::move(timeCallback))
 {
-    bzero(&oldConfig_, sizeof(oldConfig_));
-}
-
-TigerComm::~TigerComm()
-{
-    close();
-}
-
-bool TigerComm::open(const std::string& portName, int baudrate)
-{
-    if(fileHandle_ != -1)
-    {
-        cerr << "Serial port is already open\n";
-        return false;
-    }
-
-    //reset values
-    fileHandle_ = -1;
-    shutdownRequested_ = false;
-
     if(!getBaudrateConstant(baudrate, baudrate))
-        return false;
+        return;
 
     //open port
-    fileHandle_ = ::open(portName.c_str(), O_RDWR | O_NOCTTY);
+    fileHandle_ = open(portName.c_str(), O_RDWR | O_NOCTTY);
     if(fileHandle_ == -1)
     {
         cerr << "Error while opening serial port " << portName << ": " << strerror(errno);
-        return false;
+        return;
     }
 
-    int ret = -1;
-
-    ret = tcgetattr(fileHandle_, &oldConfig_); // save current port settings
+    bzero(&oldConfig_, sizeof(oldConfig_));
+    int ret = tcgetattr(fileHandle_, &oldConfig_); // save current port settings
     if(ret == -1)
     {
         cerr << "Error during tcgetattr: " << strerror(errno);
-        return false;
+        return;
     }
 
     if(!isatty(fileHandle_))
     {
         cerr << "File descriptor " << fileHandle_ << " is NOT a serial port\n";
-        return false;
+        return;
     }
 
-    struct termios newtio;  //structure for port settings
+    struct termios newtio{};  //structure for port settings
     bzero(&newtio, sizeof(newtio));
     //set data connection to 8N1, no flow control
     newtio.c_cflag = baudrate | CS8 | CREAD | CLOCAL;
@@ -83,7 +61,7 @@ bool TigerComm::open(const std::string& portName, int baudrate)
     if(ret == -1)
     {
         cerr << "Error during tcsetattr: " << strerror(errno);
-        return false;
+        return;
     }
 
     // set serial low latency flag
@@ -92,24 +70,25 @@ bool TigerComm::open(const std::string& portName, int baudrate)
     serial.flags |= ASYNC_LOW_LATENCY;
     ioctl(fileHandle_, TIOCSSERIAL, &serial);
 
-    cout << "Successfully opened " << portName << " with baudrate define " << baudrate << ". Fd is " << fileHandle_ << endl;
-
     receiveThread_ = std::thread(&TigerComm::receiveThread, this);
+    writeThread_ = std::thread(&TigerComm::writeThread, this);
 
-    return true;
+    cout << "Successfully opened " << portName << " with baudrate define " << baudrate << ". Fd is " << fileHandle_ << endl;
 }
 
-void TigerComm::close()
+TigerComm::~TigerComm()
 {
     if(fileHandle_ != -1)
-    {
-        ::close(fileHandle_);
-    }
+        close(fileHandle_);
 
     shutdownRequested_ = true;
 
     if(receiveThread_.joinable())
         receiveThread_.join();
+
+    writeMutexCondition_.notify_one();
+    if(writeThread_.joinable())
+        writeThread_.join();
 
     tcsetattr(fileHandle_, TCSANOW, &oldConfig_);
     fileHandle_ = -1;
@@ -242,16 +221,58 @@ void TigerComm::receiveThread()
                     }
                     else
                     {
-                        cerr << "CRC error\n";
+//                        cerr << "CRC error\n";
                     }
                 }
                 else
                 {
-                    cerr << "RX encoded message size < 2, this should not happen\n";
+//                    cerr << "RX encoded message size < 2, this should not happen\n";
                 }
             }
         }
 
+    }
+}
+
+void TigerComm::writeThread()
+{
+    while(!shutdownRequested_)
+    {
+        Command command;
+        {
+            std::unique_lock<std::mutex> lock(writeQueueMutex_);
+            writeMutexCondition_.wait(lock, [this] { return shutdownRequested_ || !writeQueue_.empty(); });
+            if(shutdownRequested_)
+                return;
+
+            command = writeQueue_.front();
+            writeQueue_.pop();
+        }
+
+        // combine commandId, message data, and CRC in one buffer
+        uint16_t commandId = command.getId();
+        std::vector<uint8_t> msgData(command.getLength() + sizeof(uint16_t) + sizeof(uint32_t));
+
+        memcpy(msgData.data(), &commandId, sizeof(uint16_t));
+        memcpy(msgData.data() + sizeof(uint16_t), command.getData(), command.getLength());
+        uint32_t crc32 = CRC32CalcChecksum(msgData.data(), sizeof(uint16_t)+command.getLength());
+        memcpy(msgData.data() + sizeof(uint16_t) + command.getLength(), &crc32, sizeof(uint32_t));
+
+        // use COBS encoding and add delimiter ('0')
+        std::vector<uint8_t> txData(COBSMaxStuffedSize(msgData.size()) + 1);
+
+        uint32_t encodedSize;
+        int16_t result = COBSEncode(msgData.data(), msgData.size(), txData.data(), txData.size(), &encodedSize);
+        if(result)
+        {
+            cerr << "COBS encoding error: " << result << " while processing command id: " << commandId << endl;
+            return;
+        }
+
+        txData[encodedSize] = 0;
+        encodedSize++;
+
+        ::write(fileHandle_, txData.data(), encodedSize);
     }
 }
 
@@ -268,40 +289,11 @@ std::shared_ptr<Command> TigerComm::read()
     return pMsg;
 }
 
-void TigerComm::write(const Command& cmd)
+void TigerComm::write(const Command& pCmd)
 {
-    write(cmd.getId(), cmd.getData(), cmd.getLength());
-}
-
-void TigerComm::write(uint16_t commandId, const void* pData, size_t dataLength)
-{
-    using namespace std;
-
-    std::lock_guard<std::mutex> lock(writeMutex_);
-
-    // combine commandId, message data, and CRC in one buffer
-    std::vector<uint8_t> msgData(dataLength + sizeof(uint16_t) + sizeof(uint32_t));
-
-    memcpy(msgData.data(), &commandId, sizeof(uint16_t));
-    memcpy(msgData.data() + sizeof(uint16_t), pData, dataLength);
-    uint32_t crc32 = CRC32CalcChecksum(msgData.data(), sizeof(uint16_t)+dataLength);
-    memcpy(msgData.data() + sizeof(uint16_t) + dataLength, &crc32, sizeof(uint32_t));
-
-    // use COBS encoding and add delimiter ('0')
-    std::vector<uint8_t> txData(COBSMaxStuffedSize(msgData.size()) + 1);
-
-    uint32_t encodedSize;
-    int16_t result = COBSEncode(msgData.data(), msgData.size(), txData.data(), txData.size(), &encodedSize);
-    if(result)
-    {
-        cerr << "COBS encoding error: " << result << " while processing command id: " << commandId << endl;
-        return;
-    }
-
-    txData[encodedSize] = 0;
-    encodedSize++;
-
-    ::write(fileHandle_, txData.data(), encodedSize);
+    std::unique_lock<std::mutex> lock(writeQueueMutex_);
+    writeQueue_.push(pCmd);
+    writeMutexCondition_.notify_one();
 }
 
 /*

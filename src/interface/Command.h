@@ -8,14 +8,18 @@
 #pragma once
 
 #include <cstdint>
+#include <cstddef>
 #include <vector>
 #include <list>
 #include <type_traits>
+#include <cstddef>
 
 class Command
 {
 public:
     typedef std::list<Command> List;
+
+    Command();
 
     template<class Data>
     Command(uint16_t cmdId, Data& data);

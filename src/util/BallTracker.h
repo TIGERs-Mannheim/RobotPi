@@ -10,6 +10,7 @@
 #include "TrackingFilterPosVel.h"
 #include "util/Line.h"
 #include <deque>
+#include <cstdint>
 
 class BallTracker
 {
@@ -35,6 +36,8 @@ public:
     double getLastCaptureTimestamp() const { return tLastCapture_; }
     LineFit getLineFit() const { return lineFit_; }
     uint32_t getId() const { return id_; }
+
+    bool isNaN() const { return filter_.isNaN(); }
 
     const std::deque<HistoryEntry>& getHistory() const { return history_; }
 

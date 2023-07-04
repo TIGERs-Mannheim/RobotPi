@@ -6,14 +6,17 @@
 #include <iostream>
 #include <thread>
 #include <deque>
+#include <queue>
 #include <mutex>
+#include <condition_variable>
 #include <functional>
 
 #include <termios.h>
 #include <unistd.h>
-#include <string.h>
+#include <cstring>
 
 #include "interface/Command.h"
+#include "interface/CommandTransceiver.h"
 
 namespace rpi
 {
@@ -44,54 +47,42 @@ int16_t COBSEncode(const uint8_t* pIn, uint32_t sizeIn, uint8_t* pOut, uint32_t 
  */
 int16_t COBSDecode(const uint8_t* pIn, uint32_t sizeIn, uint8_t* pOut, uint32_t sizeOut, uint32_t* pBytesWritten);
 
-class TigerComm
+class TigerComm : public CommandTransceiver
 {
 public:
     using RemoteTimeCallback = std::function<void(uint32_t)>;
 
-    TigerComm();
+    TigerComm(const std::string& portName, int baudrate, RemoteTimeCallback timeCallback);
     ~TigerComm();
 
-    bool open(const std::string& portName, int baudrate);
-    void close();
+    void write(const Command& pCmd) override;
 
-    template<class Data>
-    void write(uint16_t commandId, const Data& data);
-
-    void write(const Command& cmd);
-
-    std::shared_ptr<Command> read();
-
-    void setRemoteTimeCallback(RemoteTimeCallback cb) { timeCallback_ = cb; }
+    std::shared_ptr<Command> read() override;
 
 private:
-    void write(uint16_t commandId, const void* pData, size_t dataLength);
-
     bool getBaudrateConstant(int baudrate, int& baudrateConstant) const;
     void receiveThread();
+    void writeThread();
 
-    int fileHandle_;
+    int fileHandle_ = -1;
     termios oldConfig_;
 
     std::thread receiveThread_;
-    bool shutdownRequested_;
+    std::thread writeThread_;
+    bool shutdownRequested_ = false;
 
     RemoteTimeCallback timeCallback_;
 
     uint8_t receiveBuffer_[MAXIMUM_MESSAGE_SIZE];
     uint8_t receiveProcessingBuffer_[MAXIMUM_MESSAGE_SIZE];
     uint8_t receiveMessageBuffer_[MAXIMUM_MESSAGE_SIZE];
-    uint32_t receiveProcessingBufferPos_;
+    uint32_t receiveProcessingBufferPos_ = 0;
 
     std::deque<std::shared_ptr<Command>> receiveQueue_;
+    std::queue<Command> writeQueue_;
     std::mutex receiveQueueMutex_;
-    std::mutex writeMutex_;
+    std::mutex writeQueueMutex_;
+    std::condition_variable writeMutexCondition_;
 };
-
-template<class Data>
-void TigerComm::write(uint16_t commandId, const Data& data)
-{
-    write(commandId, &data, sizeof(Data));
-}
 
 }

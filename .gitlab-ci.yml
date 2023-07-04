@@ -1,0 +1,60 @@
+stages:
+  - build
+
+variables:
+  FF_USE_FASTZIP: 1
+  CACHE_COMPRESSION_LEVEL: "fastest"
+
+build:
+  stage: build
+  image: registry.gitlab.tigers-mannheim.de/main/tigers-buildroot/ubuntu:rpi-22.04
+  script:
+    - cmake -B build -DCMAKE_SYSROOT=/opt/rpi3-tigers-sysroot -DCMAKE_PREFIX_PATH=/opt/arm-none-linux-gnueabihf .
+    - cmake --build build -j
+  artifacts:
+    expire_in: 1 hrs
+    name: robotpi-build-$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
+    paths:
+      - build
+
+build-image:
+  stage: build
+  image: registry.gitlab.tigers-mannheim.de/main/tigers-buildroot/ubuntu:cxxDev-22.04
+  tags:
+    - buildroot  
+  cache:
+    key: rpi3-buildroot
+    paths:
+      - tigers-buildroot/buildroot-ccache
+      - tigers-buildroot/buildroot-dl
+    when: 'always'
+  script:
+    - git clone --branch master --single-branch https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.tigers-mannheim.de/main/tigers-buildroot.git tigers-buildroot-clone
+    - mkdir -p tigers-buildroot
+    - rsync -a tigers-buildroot-clone/ tigers-buildroot/
+    - cd tigers-buildroot
+    - git submodule update --init
+    - rm -rf tigers/package/robotpi
+    - git clone --branch $CI_COMMIT_REF_NAME --single-branch --recursive https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.tigers-mannheim.de/main/robotpi.git tigers/package/robotpi
+    - echo -e '\nsource "$BR2_EXTERNAL_TIGERS_PATH/package/robotpi/Config.in"' >> tigers/Config.in
+    - echo -e '\nBR2_PACKAGE_ROBOTPI=y' >> tigers/configs/raspberrypi3_defconfig
+    - cat tigers/Config.in
+    - cat tigers/configs/raspberrypi3_defconfig
+    - export BR2_CCACHE_DIR="$PWD/buildroot-ccache"
+    - cd buildroot
+    - make BR2_EXTERNAL=../tigers raspberrypi3_defconfig
+    - make clean
+    - make -j6
+    - cd ../..
+    - 'echo "robotpi: $CI_COMMIT_REF_NAME ($CI_COMMIT_SHA)" >> versions'
+    - mkdir -p robotpi
+    - mv tigers-buildroot/buildroot/output/images/sdcard.img robotpi/sdcard.img
+    - mv tigers-buildroot/buildroot/output/images/update.squashfs robotpi/update.squashfs
+  artifacts:
+    name: robotpi-image-$CI_JOB_NAME-$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
+    paths:
+      - robotpi
+      - versions
+  only:
+    - tags
+    - master

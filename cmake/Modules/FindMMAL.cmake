@@ -9,10 +9,10 @@
 # MMAL_INCLUDE_DIRS - the MMAL include directory
 # MMAL_LIBRARIES - The MMAL libraries
 
-include(FindPkgConfig REQUIRED)
 include(FindPackageHandleStandardArgs REQUIRED)
 
-pkg_check_modules(PC_MMAL libmmal QUIET)
+set(PC_MMAL_INCLUDEDIR ${CMAKE_SYSROOT}/opt/vc/include)
+set(PC_MMAL_LIBDIR ${CMAKE_SYSROOT}/opt/vc/lib)
 
 find_path(MMAL_INCLUDE_DIR NAMES interface/mmal/mmal.h PATHS ${PC_MMAL_INCLUDEDIR})
 find_library(MMAL_LIBRARY NAMES mmal libmmal PATHS ${PC_MMAL_LIBDIR})

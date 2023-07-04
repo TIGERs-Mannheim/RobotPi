@@ -1,0 +1,10 @@
+[Unit]
+AssertPathExists=/usr/local/bin/robotpi
+
+[Service]
+ExecStart=/usr/local/bin/robotpi
+Restart=always
+
+[Install]
+Alias=robotpi
+WantedBy=multi-user.target

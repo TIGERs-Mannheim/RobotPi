@@ -52,6 +52,8 @@ public:
     PositionVector getPositionEstimate() const { return this->x.template head<_Dims>(); }
     VelocityVector getVelocityEstimate() const { return this->x.template tail<_Dims>(); }
 
+    bool isNaN() const { return this->x.array().isNaN().any(); }
+
     void predict(_Scalar timestamp)
     {
         _Scalar dt = (timestamp - lastTimestamp);

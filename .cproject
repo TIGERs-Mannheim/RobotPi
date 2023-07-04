@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+	<storageModule moduleId="org.eclipse.cdt.core.settings">
+		<cconfiguration id="cmake4eclipse.mbs.config.debug.940521637">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cmake4eclipse.mbs.config.debug.940521637" moduleId="org.eclipse.cdt.core.settings" name="Debug">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.PE64" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactName="${ProjName}" buildArtefactType="cmake4eclipse.mbs.buildArtefactType.cmake" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=cmake4eclipse.mbs.buildArtefactType.cmake,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" description="" id="cmake4eclipse.mbs.config.debug.940521637" name="Debug" optionalBuildProperties="" parent="cmake4eclipse.mbs.config.debug">
+					<folderInfo id="cmake4eclipse.mbs.config.debug.940521637." name="/" resourcePath="">
+						<toolChain id="cmake4eclipse.mbs.config.debug.toolChain.1164144872" name="CMake driven" superClass="cmake4eclipse.mbs.config.debug.toolChain">
+							<targetPlatform id="cmake4eclipse.mbs.targetPlatform.cmake.1311010809" name="Any Platform" superClass="cmake4eclipse.mbs.targetPlatform.cmake"/>
+							<builder buildPath="/RobotPi/_build/Debug" id="cmake4eclipse.mbs.builder.1716825582" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CMake Builder" superClass="cmake4eclipse.mbs.builder"/>
+							<tool id="cmake4eclipse.mbs.toolchain.tool.dummy.1475143829" name="CMake" superClass="cmake4eclipse.mbs.toolchain.tool.dummy">
+								<inputType id="cmake4eclipse.mbs.inputType.c.208609461" superClass="cmake4eclipse.mbs.inputType.c"/>
+								<inputType id="cmake4eclipse.mbs.inputType.cpp.1003596489" superClass="cmake4eclipse.mbs.inputType.cpp"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule buildDir="build/${ConfigName}" dirtyTs="1657145172999" moduleId="de.marw.cmake4eclipse.mbs.settings">
+				<options/>
+				<defs>
+					<def name="CMAKE_PREFIX_PATH" type="STRING" val="${TIGERS_ROBOTPI_TOOLCHAIN}"/>
+					<def name="CMAKE_SYSROOT" type="STRING" val="${TIGERS_ROBOTPI_ROOTFS}"/>
+				</defs>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="cmake4eclipse.mbs.config.release.1778183074">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cmake4eclipse.mbs.config.release.1778183074" moduleId="org.eclipse.cdt.core.settings" name="Release">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.PE64" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactName="${ProjName}" buildArtefactType="cmake4eclipse.mbs.buildArtefactType.cmake" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=cmake4eclipse.mbs.buildArtefactType.cmake,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" description="" id="cmake4eclipse.mbs.config.release.1778183074" name="Release" optionalBuildProperties="" parent="cmake4eclipse.mbs.config.release">
+					<folderInfo id="cmake4eclipse.mbs.config.release.1778183074." name="/" resourcePath="">
+						<toolChain id="cmake4eclipse.mbs.config.release.toolChain.1063716366" name="CMake driven" superClass="cmake4eclipse.mbs.config.release.toolChain">
+							<targetPlatform id="cmake4eclipse.mbs.targetPlatform.cmake.822193770" name="Any Platform" superClass="cmake4eclipse.mbs.targetPlatform.cmake"/>
+							<builder buildPath="/RobotPi/_build/Release" id="cmake4eclipse.mbs.builder.878228284" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CMake Builder" superClass="cmake4eclipse.mbs.builder"/>
+							<tool id="cmake4eclipse.mbs.toolchain.tool.dummy.1953730037" name="CMake" superClass="cmake4eclipse.mbs.toolchain.tool.dummy">
+								<inputType id="cmake4eclipse.mbs.inputType.c.7432484" superClass="cmake4eclipse.mbs.inputType.c"/>
+								<inputType id="cmake4eclipse.mbs.inputType.cpp.167527254" superClass="cmake4eclipse.mbs.inputType.cpp"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule buildDir="build/${ConfigName}" dirtyTs="1657147631326" moduleId="de.marw.cmake4eclipse.mbs.settings">
+				<options/>
+				<defs>
+					<def name="CMAKE_PREFIX_PATH" type="STRING" val="${TIGERS_ROBOTPI_TOOLCHAIN}"/>
+					<def name="CMAKE_SYSROOT" type="STRING" val="${TIGERS_ROBOTPI_ROOTFS}"/>
+				</defs>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="cmake4eclipse.mbs.config.release.1778183074.817104025">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cmake4eclipse.mbs.config.release.1778183074.817104025" moduleId="org.eclipse.cdt.core.settings" name="Release PC">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.PE64" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactName="${ProjName}" buildArtefactType="cmake4eclipse.mbs.buildArtefactType.cmake" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=cmake4eclipse.mbs.buildArtefactType.cmake,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" description="" id="cmake4eclipse.mbs.config.release.1778183074.817104025" name="Release PC" optionalBuildProperties="" parent="cmake4eclipse.mbs.config.release">
+					<folderInfo id="cmake4eclipse.mbs.config.release.1778183074.817104025." name="/" resourcePath="">
+						<toolChain id="cmake4eclipse.mbs.config.release.toolChain.1545479860" name="CMake driven" superClass="cmake4eclipse.mbs.config.release.toolChain">
+							<targetPlatform id="cmake4eclipse.mbs.targetPlatform.cmake.1045473080" name="Any Platform" superClass="cmake4eclipse.mbs.targetPlatform.cmake"/>
+							<builder buildPath="/RobotPi/_build/Release" id="cmake4eclipse.mbs.builder.54556539" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CMake Builder" superClass="cmake4eclipse.mbs.builder"/>
+							<tool id="cmake4eclipse.mbs.toolchain.tool.dummy.32687465" name="CMake" superClass="cmake4eclipse.mbs.toolchain.tool.dummy">
+								<inputType id="cmake4eclipse.mbs.inputType.c.768908620" superClass="cmake4eclipse.mbs.inputType.c"/>
+								<inputType id="cmake4eclipse.mbs.inputType.cpp.1198226218" superClass="cmake4eclipse.mbs.inputType.cpp"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule buildDir="build/${ConfigName}" dirtyTs="1685201292792" moduleId="de.marw.cmake4eclipse.mbs.settings">
+				<options/>
+				<defs>
+					<def name="BUILD_FOR_PI" type="BOOL" val="OFF"/>
+					<def name="BUILD_FOR_CAM" type="BOOL" val="OFF"/>
+				</defs>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+	</storageModule>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.release.860341038;cdt.managedbuild.config.gnu.cross.exe.release.860341038.;cdt.managedbuild.tool.gnu.cross.cpp.compiler.508650096;cdt.managedbuild.tool.gnu.cpp.compiler.input.1145319952">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1372720619;cdt.managedbuild.config.gnu.cross.exe.debug.1372720619.;cdt.managedbuild.tool.gnu.cross.cpp.compiler.987401924;cdt.managedbuild.tool.gnu.cpp.compiler.input.1870781919">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.release.860341038;cdt.managedbuild.config.gnu.cross.exe.release.860341038.;cdt.managedbuild.tool.gnu.cross.c.compiler.2043708657;cdt.managedbuild.tool.gnu.c.compiler.input.1130025094">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1372720619;cdt.managedbuild.config.gnu.cross.exe.debug.1372720619.;cdt.managedbuild.tool.gnu.cross.c.compiler.3585752;cdt.managedbuild.tool.gnu.c.compiler.input.986118799">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+	</storageModule>
+	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+		<project id="RobotPi.cmake4eclipse.mbs.projectType.846326457" name="Cmake4eclipse" projectType="cmake4eclipse.mbs.projectType"/>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/RobotPi"/>
+		</configuration>
+		<configuration configurationName="Release">
+			<resource resourceType="PROJECT" workspacePath="/RobotPi"/>
+		</configuration>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+</cproject>

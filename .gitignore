@@ -1,0 +1,16 @@
+Debug
+Release
+
+/_build/
+/build/
+/cmake-build-*
+git_version.h
+
+/.cache
+/.cmake
+/.idea
+
+*.jpg
+*.yuv
+*.rle
+*.png

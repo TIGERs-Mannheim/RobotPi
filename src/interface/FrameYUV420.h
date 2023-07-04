@@ -10,13 +10,12 @@
 #include "util/Color.h"
 #include <string>
 
-class FrameMetadata
+struct FrameMetadata
 {
-public:
-    uint32_t width;
-    uint32_t height;
-    int64_t timestampUs; // RPi STC (system time clock) at start of frame readout (not start of exposure!)
-    uint32_t exposureUs;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    int64_t timestampUs = 0; // RPi STC (system time clock) at start of frame readout (not start of exposure!)
+    uint32_t exposureUs = 0;
 
     // timestamp for center of exposure is timestampUs - exposureUs/2
 };
@@ -55,6 +54,7 @@ public:
 
     // draw text at point (x, y), lower left corner, in full resolution coordinates
     void drawText(int32_t x, int32_t y, std::string text, ColorYUV color, bool large = false);
+
 private:
     uint8_t* pYData_;
     uint8_t* pUData_;
